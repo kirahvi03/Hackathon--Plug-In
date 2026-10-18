@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Intent Translator",
+    "description": "Mark 1–3 vague fragments in blue, fork each into human-readable directions, replace only that fragment, then undo or request a new set."
+  }
+}

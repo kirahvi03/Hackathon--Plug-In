@@ -1,0 +1,13 @@
+# dsh-intent-translator：用 #66ccff 标出 1–3 处模糊片段，分别分叉成人话方向。
+# Host 半边挂 /api/dsh-intent-translator/fork 与 ctx.llm 调用；
+# Client 半边由 dsh.client 声明，向 conversation.input.left / input.dock 注册。
+- insert:
+    - id: dsh-intent-translator
+      name: 'dsh-intent-translator'
+      # 可选配置（全部有默认值）：
+      # config:
+      #   timeoutMs: 15000
+      #   maxInputChars: 8000
+      #   provider: ''
+      #   model: ''
+      #   reasoningEffort: off

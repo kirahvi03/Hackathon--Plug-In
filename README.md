@@ -5,7 +5,8 @@
 内容分两部分：
 
 1. **本机开发环境**的配置与自检脚本（第 1–3 节）
-2. **DSH 插件骨架** `plugins/hackathon-starter/`（第 4 节），可直接改造为参赛作品
+2. **DSH 插件**：骨架 `plugins/hackathon-starter/` 与参赛作品
+   `plugins/dsh-intent-translator/`（第 4 节）
 
 游戏方向的仓库在另一处：[Hackathon--Game](https://github.com/kirahvi03/Hackathon--Game)
 （本地路径 `..\hackathon-game`）。
@@ -107,9 +108,11 @@ git push
 
 ---
 
-## 4. DSH 插件骨架（`plugins/hackathon-starter/`）
+## 4. DSH 插件：骨架与参赛作品
 
-本机 DSH 是 **0.2.0-rc.2**，插件框架为 **Cordis 4**。一个插件包 = 一个 bundle，
+### 4.1 插件骨架（`plugins/hackathon-starter/`）
+
+本机 DSH 是 **0.2.1-rc.2**，插件框架为 **Cordis 4**。一个插件包 = 一个 bundle，
 由 `package.json` 的 `dsh.bundle.patch` 指向 `cordis.patch.yml`，后者把插件行 insert 进 profile 的插件树。
 
 骨架同时演示两个扩展点：
@@ -141,6 +144,40 @@ dsh plugin --profile desktop add "C:\Users\19371\Documents\deepseek-harness\defa
 > ℹ️ 官方包（`@deepseek-ai/dsh-tools` 等）**不在 npm 上**，它们打包在 `app.asar` 内。
 > 插件通过 `peerDependencies` 声明版本要求，由宿主提供实现，因此**不要自己 `pnpm add` 这些包**。
 
+### 4.2 参赛作品：`plugins/dsh-intent-translator/`
+
+面向 vibecoding 的**意图翻译器**：用亮蓝色 `#66ccff` 标出输入里的 1–3 处模糊描述，
+每一处独立分叉成 2–3 个「人话方向」卡片；点选一张只替换它所属的模糊片段，
+「背景有图片」这类确定信息原样保留。支持撤回和「换一组」。
+
+![意图翻译器多片段候选卡片](plugins/dsh-intent-translator/docs/preview.png)
+
+| 项 | 位置 / 说明 |
+| --- | --- |
+| 工具行按钮 | `conversation.input.left`，与 `dsh-prompt-optimizer` 的 ✨ 同槽位 |
+| 候选卡片 | `conversation.input.dock`，输入框上方 |
+| Host | `lib/host.js`：`ctx.webServer` 路由 + `ctx.llm.stream()`，15s 超时 |
+| 纯逻辑 | `lib/engine.js`：多片段校验、人话标签守卫、方向去重、span 定位与替换 |
+| Client | `client.src.js` → `client.js`：按钮、卡片、`#66ccff` 高亮、逐段替换、撤回、换一组 |
+| 完整说明 | [`plugins/dsh-intent-translator/README.md`](plugins/dsh-intent-translator/README.md) |
+| 实现计划 | [`docs/dsh-intent-translator-plan.md`](docs/dsh-intent-translator-plan.md) |
+
+安装到 `desktop` profile（需要重启一次让 Host 新行生效）：
+
+```powershell
+dsh plugin --profile desktop add "C:\path\to\Hackathon--Plug-In\plugins\dsh-intent-translator"
+```
+
+验证：
+
+```powershell
+cd plugins\dsh-intent-translator
+npm test        # 构建 client.js，再跑 33 个 Node 测试
+```
+
+V2 只预留接口：点选方向后可通过 `ctx` 调用 `dsh-prompt-optimizer` 精修，
+V1 不自动调用，也不复制其代码。详见插件 README。
+
 ---
 
 ## 5. 注意事项
@@ -165,16 +202,27 @@ dsh plugin --profile desktop add "C:\Users\19371\Documents\deepseek-harness\defa
 ├─ .gitignore                             忽略规则（Node / Python / 密钥 / 编辑器）
 ├─ .gitattributes                         行尾符与二进制文件规则
 ├─ docs/
-│  └─ dsh-plugin-development-report.md    DSH 插件开发研究报告（58KB）
+│  ├─ dsh-plugin-development-report.md    DSH 插件开发研究报告（58KB）
+│  └─ dsh-intent-translator-plan.md       意图翻译器实现计划
 ├─ plugins/
-│  └─ hackathon-starter/                  ← 插件骨架，从这里改造
-│     ├─ package.json                     bundle 清单（dsh.bundle.patch / dsh.client）
-│     ├─ cordis.patch.yml                 把插件行 insert 进 profile
-│     ├─ index.js                         Host 半边：注册 plugin_ping 工具
-│     ├─ client.js                        Client 半边：输入框下方徽标
-│     ├─ icon.svg                         插件卡片图标
-│     ├─ locale/{zh,en}.json              显示名称与描述
-│     └─ README.md                        骨架的改造指引
+│  ├─ hackathon-starter/                  ← 插件骨架
+│  │  ├─ package.json                     bundle 清单（dsh.bundle.patch / dsh.client）
+│  │  ├─ cordis.patch.yml                 把插件行 insert 进 profile
+│  │  ├─ index.js                         Host 半边：注册 plugin_ping 工具
+│  │  ├─ client.js                        Client 半边：输入框下方徽标
+│  │  ├─ icon.svg                         插件卡片图标
+│  │  ├─ locale/{zh,en}.json              显示名称与描述
+│  │  └─ README.md                        骨架的改造指引
+│  └─ dsh-intent-translator/              ← 参赛作品：意图翻译器
+│     ├─ package.json                     bundle + dsh.client + peerDependencies
+│     ├─ cordis.patch.yml                 Host 行 insert
+│     ├─ index.js                         Host 入口
+│     ├─ lib/{engine,host}.js             纯逻辑 + 路由/LLM/超时
+│     ├─ client.src.js → client.js        Client 源码与构建产物
+│     ├─ scripts/build-client.mjs         零依赖构建（内联 engine.js）
+│     ├─ test/*.test.mjs                  33 个 Node 测试
+│     ├─ docs/preview*.png                验收截图
+│     └─ README.md                        安装/配置/数据契约/V2 边界
 └─ scripts/
    └─ env-check.ps1                       环境自检脚本
 ```

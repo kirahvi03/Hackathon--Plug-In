@@ -1,0 +1,67 @@
+{
+  "name": "dsh-intent-translator",
+  "version": "1.1.0",
+  "description": "用 #66ccff 标出 1–3 处模糊描述，分别分叉成人话方向；点选只替换对应片段，支持撤回与换一组。",
+  "private": true,
+  "type": "module",
+  "main": "./index.js",
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client.js",
+    "./package.json": "./package.json",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg"
+  },
+  "files": [
+    "index.js",
+    "lib/*.js",
+    "client.js",
+    "cordis.patch.yml",
+    "locale/*.json",
+    "icon.svg",
+    "docs/preview.png",
+    "docs/preview-single.png",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "node scripts/build-client.mjs",
+    "test": "node scripts/build-client.mjs && node --test test/engine.test.mjs test/host.test.mjs test/client.test.mjs",
+    "check": "node --check index.js && node --check lib/engine.js && node --check lib/host.js && node --check client.js && node --check scripts/build-client.mjs"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "immediately": true,
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-conversation",
+        "@deepseek-ai/dsh-client-locale"
+      ]
+    }
+  },
+  "peerDependencies": {
+    "@deepseek-ai/dsh": ">=0.2.0-0 <0.3.0-0",
+    "@deepseek-ai/cordis": "~4.0.5",
+    "@deepseek-ai/dsh-client-ui-conversation": ">=0.2.0-0 <0.3.0-0",
+    "@deepseek-ai/dsh-client-locale": ">=0.2.0-0 <0.3.0-0"
+  },
+  "peerDependenciesMeta": {
+    "@deepseek-ai/dsh-client-ui-conversation": {
+      "optional": true
+    },
+    "@deepseek-ai/dsh-client-locale": {
+      "optional": true
+    }
+  },
+  "dshCompat": {
+    "testedHost": "0.2.1-rc.2",
+    "minHost": "0.2.0",
+    "clientPlatform": "web"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "MIT"
+}
