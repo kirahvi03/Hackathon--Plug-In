@@ -87,7 +87,9 @@ test('client bundle carries the blue highlight, multi-segment and retry UI', () 
 });
 
 test('client bundle constrains the card area and supports host dark theme + wheel easing', () => {
-  assert.ok(code.includes('max-height:min(68vh,640px)'));
+  assert.ok(code.includes('max-height:min(82vh,820px)'));
+  assert.ok(code.includes('width:clamp(520px,60vw,1100px)'));
+  assert.ok(code.includes('position:fixed'));
   assert.ok(code.includes('body[data-ds-dark-theme]'));
   assert.ok(code.includes('overscroll-behavior:contain'));
   assert.ok(code.includes("addEventListener('wheel'"));

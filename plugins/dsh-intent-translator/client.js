@@ -1887,35 +1887,6 @@ return engine;
                   h('div', { className: 'dit-preview-text' }, markedSegments(state.original, segments)),
                 ),
           ),
-          h(
-            'div',
-            { className: 'dit-head-actions' },
-            !noChange && !anyApplied
-              ? h(
-                  'button',
-                  {
-                    type: 'button',
-                    className: 'dit-link dit-retry',
-                    title: t('retryGroupTitle'),
-                    onMouseDown: keepFocus,
-                    onClick: () => retryFork(store, props.sessionId, draftRef, props.inputActions),
-                  },
-                  h(RetryIcon),
-                  t('retryGroup'),
-                )
-              : null,
-            h(
-              'button',
-              {
-                type: 'button',
-                className: 'dit-icon-btn',
-                title: t('close'),
-                'aria-label': t('close'),
-                onClick: () => closeResult(store),
-              },
-              '×',
-            ),
-          ),
         ),
         noChange
           ? h(
@@ -1947,37 +1918,62 @@ return engine;
                 });
               }),
             ),
-        noChange
-          ? null
-          : h(
-              'div',
-              { className: 'dit-foot' },
-              h(
-                'span',
-                null,
-                allApplied
-                  ? t('allApplied')
-                  : anyApplied
-                    ? t('applyProgress', { done: appliedCount, total: segments.length })
-                    : t('chooseHint'),
-              ),
-              h(
-                'span',
-                { className: 'dit-foot-actions' },
-                state.undo
-                  ? h(
-                      'button',
-                      {
-                        type: 'button',
-                        className: 'dit-link',
-                        onMouseDown: keepFocus,
-                        onClick: () => undoSelection(store, draftRef, props.inputActions),
-                      },
-                      t('undoAll'),
-                    )
-                  : null,
-              ),
+        h(
+          'div',
+          { className: 'dit-foot' },
+          h(
+            'span',
+            null,
+            noChange
+              ? ''
+              : allApplied
+                ? t('allApplied')
+                : anyApplied
+                  ? t('applyProgress', { done: appliedCount, total: segments.length })
+                  : t('chooseHint'),
+          ),
+          h(
+            'span',
+            { className: 'dit-foot-actions' },
+            !noChange && !anyApplied
+              ? h(
+                  'button',
+                  {
+                    type: 'button',
+                    className: 'dit-link dit-retry',
+                    title: t('retryGroupTitle'),
+                    onMouseDown: keepFocus,
+                    onClick: () => retryFork(store, props.sessionId, draftRef, props.inputActions),
+                  },
+                  h(RetryIcon),
+                  t('retryGroup'),
+                )
+              : null,
+            state.undo
+              ? h(
+                  'button',
+                  {
+                    type: 'button',
+                    className: 'dit-link',
+                    onMouseDown: keepFocus,
+                    onClick: () => undoSelection(store, draftRef, props.inputActions),
+                  },
+                  t('undoAll'),
+                )
+              : null,
+            h(
+              'button',
+              {
+                type: 'button',
+                className: 'dit-icon-btn',
+                title: t('close'),
+                'aria-label': t('close'),
+                onClick: () => closeResult(store),
+              },
+              '×',
             ),
+          ),
+        ),
       );
     }
 
@@ -1994,10 +1990,10 @@ return engine;
 .dit-undo{color:var(--dsw-alias-state-success-primary,#22c55e)}
 .dit-spin{animation:dit-spin 1s linear infinite}
 @keyframes dit-spin{to{transform:rotate(360deg)}}
-.dit-shell{position:relative;display:flex;flex-direction:column;max-height:min(68vh,640px);overflow:hidden;margin:0 0 6px;padding:12px 14px;color:var(--dsw-alias-label-primary,#1a1a1a);font-size:13px;line-height:1.5;border:1px solid rgba(255,255,255,.38);border-radius:16px;background:linear-gradient(135deg,rgba(255,255,255,.20),rgba(255,255,255,.06) 52%,rgba(255,255,255,.12));-webkit-backdrop-filter:blur(18px) saturate(170%);backdrop-filter:blur(18px) saturate(170%);box-shadow:0 18px 48px rgba(0,0,0,.20),0 2px 10px rgba(0,0,0,.08),inset 0 1px 0 rgba(255,255,255,.45),inset 0 -1px 0 rgba(255,255,255,.05)}
+.dit-shell{box-sizing:border-box;position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:60;display:flex;flex-direction:column;width:clamp(520px,60vw,1100px);max-width:calc(100vw - 32px);max-height:min(82vh,820px);overflow:hidden;margin:0;padding:16px 18px;color:var(--dsw-alias-label-primary,#1a1a1a);font-size:13px;line-height:1.5;border:1px solid rgba(120,140,170,.22);border-radius:20px;background:linear-gradient(135deg,rgba(255,255,255,.46),rgba(244,248,255,.26) 52%,rgba(250,247,255,.38));-webkit-backdrop-filter:blur(18px) saturate(170%);backdrop-filter:blur(18px) saturate(170%);box-shadow:0 24px 64px rgba(15,23,42,.20),0 8px 20px rgba(15,23,42,.10),inset 0 1px 0 rgba(255,255,255,.55),inset 0 -1px 0 rgba(255,255,255,.10)}
 .dit-shell::before{content:"";position:absolute;inset:0;border-radius:inherit;background:radial-gradient(90% 70% at 0% 0%,rgba(255,255,255,.18),transparent 60%),radial-gradient(70% 60% at 100% 100%,rgba(120,170,255,.12),transparent 65%);pointer-events:none;z-index:0}
 .dit-shell>*{position:relative;z-index:1}
-.dit-bar{display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid rgba(255,255,255,.34);border-radius:12px;background:rgba(255,255,255,.10);min-width:0}
+.dit-bar{display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid rgba(120,140,170,.16);border-radius:12px;background:rgba(255,255,255,.36);min-width:0}
 .dit-bar-text{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .dit-bar.is-loading{color:var(--dsw-alias-label-secondary,#7f8287)}
 .dit-bar.is-error{border-color:rgba(229,72,77,.42);background:rgba(229,72,77,.10)}
@@ -2008,13 +2004,13 @@ return engine;
 .dit-error-body span{font-size:12px;color:var(--dsw-alias-label-secondary,#7f8287)}
 .dit-notice{display:flex;align-items:center;gap:6px;margin:0 2px 6px;padding:5px 8px;border-radius:var(--dsw-radius-sm,8px);background:color-mix(in srgb,var(--dsw-alias-state-warn-primary,#d98e00) 9%,transparent);color:var(--dsw-alias-label-secondary,#7f8287);font-size:11.5px}
 .dit-notice.is-error{background:color-mix(in srgb,var(--dsw-alias-state-error-primary,#e5484d) 9%,transparent);color:var(--dsw-alias-state-error-primary,#e5484d)}
-.dit-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:6px;padding:0 2px}
+.dit-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:6px;padding:0 2px;flex:none}
 .dit-head-main{min-width:0;flex:1}
 .dit-head-actions{display:flex;align-items:center;gap:2px;flex:none}
 .dit-kicker{font-size:12px;font-weight:600;color:var(--dsw-alias-label-secondary,#7f8287);letter-spacing:.02em}
 .dit-preview{margin-top:3px;display:flex;flex-direction:column;gap:1px;min-width:0}
 .dit-preview-label{font-size:10.5px;color:var(--dsw-alias-label-tertiary,#979da6);letter-spacing:.02em}
-.dit-preview-text{font-size:12px;line-height:1.55;color:var(--dsw-alias-label-secondary,#7f8287);overflow-wrap:anywhere;max-height:66px;overflow-y:auto;padding-right:2px}
+.dit-preview-text{font-size:12px;line-height:1.55;color:var(--dsw-alias-label-secondary,#7f8287);overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;padding-right:2px}
 .dit-blue{color:#66ccff}
 ::highlight(dsh-intent-translator-ambiguous){color:#66ccff}
 .dit-span{margin-top:2px;font-size:12px;color:var(--dsw-alias-label-tertiary,#979da6);overflow-wrap:anywhere}
@@ -2028,13 +2024,14 @@ return engine;
 .dit-seg-span{font-size:12px;color:var(--dsw-alias-label-secondary,#7f8287);overflow-wrap:anywhere}
 .dit-applied-tag{font-size:10.5px;color:var(--dsw-alias-state-success-primary,#22c55e);background:color-mix(in srgb,var(--dsw-alias-state-success-primary,#22c55e) 12%,transparent);padding:2px 6px;border-radius:999px}
 .dit-applied-row{display:flex;align-items:center;gap:7px;padding:7px 9px;border:0.5px solid color-mix(in srgb,var(--dsw-alias-state-success-primary,#22c55e) 30%,transparent);border-radius:var(--dsw-radius-md,12px);background:color-mix(in srgb,var(--dsw-alias-state-success-primary,#22c55e) 6%,transparent);font-size:12px;color:var(--dsw-alias-label-secondary,#7f8287)}
-.dit-retry{display:inline-flex;align-items:center;gap:4px;padding:3px 4px}
+.dit-retry{display:inline-flex;align-items:center;gap:4px;padding:4px 9px;border:1px solid rgba(120,140,170,.22);border-radius:8px;background:rgba(255,255,255,.34);color:var(--dsw-alias-label-secondary,#7f8287);font:inherit;font-size:11.5px;line-height:1.2;cursor:pointer;transition:background .15s,border-color .15s,color .15s}
+.dit-retry:hover{background:rgba(255,255,255,.52);border-color:rgba(102,204,255,.45);color:var(--dsw-alias-label-primary,#1a1a1a)}
 .dit-retry svg{flex:none}
 .dit-foot-actions{display:inline-flex;align-items:center;gap:8px;margin-left:auto}
 .dit-cards{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 4px;scrollbar-width:thin}
 .dit-cards.is-single{overflow-x:visible}
-.dit-card{box-sizing:border-box;flex:1 1 220px;min-width:220px;max-width:320px;display:flex;flex-direction:column;gap:6px;padding:12px;border:1px solid rgba(255,255,255,.30);border-radius:14px;background:linear-gradient(160deg,rgba(255,255,255,.16),rgba(255,255,255,.05));-webkit-backdrop-filter:blur(10px) saturate(160%);backdrop-filter:blur(10px) saturate(160%);box-shadow:0 4px 16px rgba(0,0,0,.08),inset 0 1px 0 rgba(255,255,255,.26);cursor:pointer;transition:border-color .15s,background .15s,box-shadow .15s;text-align:left}
-.dit-card:hover{border-color:rgba(102,204,255,.55);background:linear-gradient(160deg,rgba(255,255,255,.24),rgba(255,255,255,.09));box-shadow:0 10px 26px rgba(0,0,0,.16),0 0 0 1px rgba(102,204,255,.30),0 0 18px rgba(102,204,255,.16),inset 0 1px 0 rgba(255,255,255,.42)}
+.dit-card{box-sizing:border-box;flex:1 1 220px;min-width:220px;max-width:320px;display:flex;flex-direction:column;gap:6px;padding:12px;border:1px solid rgba(120,140,170,.18);border-radius:14px;background:linear-gradient(160deg,rgba(255,255,255,.52),rgba(255,255,255,.28));-webkit-backdrop-filter:blur(10px) saturate(160%);backdrop-filter:blur(10px) saturate(160%);box-shadow:0 4px 16px rgba(15,23,42,.08),inset 0 1px 0 rgba(255,255,255,.48);cursor:pointer;transition:border-color .15s,background .15s,box-shadow .15s;text-align:left}
+.dit-card:hover{border-color:rgba(102,204,255,.55);background:linear-gradient(160deg,rgba(255,255,255,.62),rgba(255,255,255,.38));box-shadow:0 10px 26px rgba(15,23,42,.14),0 0 0 1px rgba(102,204,255,.30),0 0 18px rgba(102,204,255,.16),inset 0 1px 0 rgba(255,255,255,.55)}
 .dit-card:focus-visible{outline:2px solid var(--dsw-alias-brand-primary,#4d93f8);outline-offset:2px}
 .dit-card.is-single{flex:1 1 360px;max-width:480px}
 .dit-card-top{display:flex;align-items:center;justify-content:space-between;gap:6px}
@@ -2045,38 +2042,48 @@ return engine;
 .dit-card-links{display:flex;align-items:center;gap:6px}
 .dit-link{border:0;background:transparent;color:var(--dsw-alias-brand-primary,#4d93f8);font:inherit;font-size:12px;padding:2px 0;cursor:pointer;text-align:left}
 .dit-link:hover{text-decoration:underline}
-.dit-prompt{display:flex;flex-direction:column;gap:6px;padding:8px;border:1px solid rgba(255,255,255,.20);border-radius:10px;background:rgba(255,255,255,.08);cursor:default}
+.dit-prompt{display:flex;flex-direction:column;gap:6px;padding:8px;border:1px solid rgba(120,140,170,.15);border-radius:10px;background:rgba(255,255,255,.38);cursor:default}
 .dit-prompt-label{font-size:10.5px;color:var(--dsw-alias-label-tertiary,#979da6);letter-spacing:.04em}
 .dit-prompt-text{font-family:var(--ds-font-family-code,monospace);font-size:11.5px;line-height:1.6;color:var(--dsw-alias-label-primary,#1a1a1a);word-break:break-word;user-select:text}
 .dit-prompt-actions{display:flex;gap:6px}
-.dit-btn{border:1px solid rgba(255,255,255,.38);background:rgba(255,255,255,.12);color:var(--dsw-alias-label-primary,#1a1a1a);font:inherit;font-size:11.5px;padding:3px 8px;border-radius:999px;cursor:pointer}
-.dit-btn:hover{background:rgba(255,255,255,.22)}
+.dit-btn{border:1px solid rgba(120,140,170,.22);background:rgba(255,255,255,.44);color:var(--dsw-alias-label-primary,#1a1a1a);font:inherit;font-size:11.5px;padding:3px 8px;border-radius:999px;cursor:pointer}
+.dit-btn:hover{background:rgba(255,255,255,.62)}
 .dit-btn:focus-visible{outline:2px solid var(--dsw-alias-brand-primary,#4d93f8);outline-offset:1px}
 .dit-card-cta{margin-top:auto;padding-top:2px;font-size:11.5px;font-weight:500;color:var(--dsw-alias-brand-primary,#4d93f8)}
-.dit-foot{display:flex;flex-wrap:wrap;gap:6px;padding:4px 2px 0;font-size:11.5px;color:var(--dsw-alias-label-tertiary,#979da6)}
+.dit-foot{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px;padding:8px 2px 0;font-size:11.5px;color:var(--dsw-alias-label-tertiary,#979da6)}
 .dit-empty{padding:12px;border:1px dashed rgba(255,255,255,.38);border-radius:12px;background:rgba(255,255,255,.06);font-size:12.5px;color:var(--dsw-alias-label-secondary,#7f8287)}
 .dit-empty-title{font-size:13px;color:var(--dsw-alias-label-primary,#1a1a1a);margin-bottom:2px}
 .dit-muted{color:var(--dsw-alias-label-tertiary,#979da6);font-size:11.5px}
-.dit-icon-btn{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border:0;border-radius:var(--dsw-radius-xs,4px);background:transparent;color:var(--dsw-alias-label-tertiary,#979da6);font:inherit;font-size:15px;line-height:1;cursor:pointer;flex:none}
-.dit-icon-btn:hover{background:var(--dsw-alias-interactive-bg-hover,rgba(127,127,127,.12));color:var(--dsw-alias-label-primary,#1a1a1a)}
+.dit-icon-btn{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border:1px solid transparent;border-radius:8px;background:transparent;color:var(--dsw-alias-label-tertiary,#979da6);font:inherit;font-size:16px;line-height:1;cursor:pointer;flex:none}
+.dit-icon-btn:hover{background:rgba(255,255,255,.40);border-color:rgba(120,140,170,.20);color:var(--dsw-alias-label-primary,#1a1a1a)}
 .dit-refine{display:flex;flex-direction:column;gap:4px;padding:7px 8px;border-radius:var(--dsw-radius-sm,8px);background:color-mix(in srgb,var(--dsw-alias-brand-primary,#4d93f8) 6%,transparent);font-size:11.5px;color:var(--dsw-alias-label-secondary,#7f8287)}
 .dit-refine.is-pending{flex-direction:row;align-items:center;gap:6px}
 .dit-refine.is-error{color:var(--dsw-alias-state-error-primary,#e5484d);background:color-mix(in srgb,var(--dsw-alias-state-error-primary,#e5484d) 7%,transparent)}
 .dit-shell::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:0;background:linear-gradient(118deg,transparent 32%,rgba(255,255,255,.05) 45%,rgba(255,255,255,.075) 49%,transparent 60%)}
 @media (prefers-color-scheme:dark){
-  .dit-shell{background:linear-gradient(135deg,rgba(255,255,255,.15),rgba(255,255,255,.03) 52%,rgba(255,255,255,.07));border-color:rgba(255,255,255,.34);box-shadow:0 18px 48px rgba(0,0,0,.55),0 0 36px rgba(102,204,255,.08),0 2px 10px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.40),inset 0 0 26px rgba(255,255,255,.04)}
+  .dit-shell{background:linear-gradient(135deg,rgba(255,255,255,.15),rgba(255,255,255,.03) 52%,rgba(255,255,255,.07));border-color:rgba(255,255,255,.34);box-shadow:0 28px 80px rgba(0,0,0,.55),0 0 40px rgba(102,204,255,.10),inset 0 1px 0 rgba(255,255,255,.40),inset 0 0 26px rgba(255,255,255,.04)}
   .dit-shell::before{background:radial-gradient(100% 75% at 0% 0%,rgba(255,255,255,.28),transparent 58%),radial-gradient(65% 65% at 100% 0%,rgba(140,180,255,.20),transparent 62%),radial-gradient(55% 55% at 60% 100%,rgba(200,150,255,.10),transparent 65%)}
   .dit-shell::after{background:linear-gradient(118deg,transparent 30%,rgba(255,255,255,.08) 43%,rgba(255,255,255,.13) 48%,transparent 60%)}
   .dit-card{background:linear-gradient(160deg,rgba(255,255,255,.14),rgba(255,255,255,.035));border-color:rgba(255,255,255,.26);box-shadow:0 4px 16px rgba(0,0,0,.32),inset 0 1px 0 rgba(255,255,255,.30)}
   .dit-card:hover{background:linear-gradient(160deg,rgba(255,255,255,.22),rgba(255,255,255,.08));border-color:rgba(255,255,255,.40)}
   .dit-bar,.dit-prompt{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.20)}
+  .dit-retry{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.20)}
+  .dit-retry:hover{background:rgba(255,255,255,.14);border-color:rgba(102,204,255,.55)}
+  .dit-icon-btn:hover{background:rgba(255,255,255,.10);border-color:rgba(255,255,255,.20)}
+  .dit-btn{background:rgba(255,255,255,.10);border-color:rgba(255,255,255,.24)}
+  .dit-btn:hover{background:rgba(255,255,255,.18)}
 }
-body[data-ds-dark-theme] .dit-shell{background:linear-gradient(135deg,rgba(255,255,255,.15),rgba(255,255,255,.03) 52%,rgba(255,255,255,.07));border-color:rgba(255,255,255,.34);box-shadow:0 18px 48px rgba(0,0,0,.55),0 0 36px rgba(102,204,255,.08),0 2px 10px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.40),inset 0 0 26px rgba(255,255,255,.04)}
+body[data-ds-dark-theme] .dit-shell{background:linear-gradient(135deg,rgba(255,255,255,.15),rgba(255,255,255,.03) 52%,rgba(255,255,255,.07));border-color:rgba(255,255,255,.34);box-shadow:0 28px 80px rgba(0,0,0,.55),0 0 40px rgba(102,204,255,.10),inset 0 1px 0 rgba(255,255,255,.40),inset 0 0 26px rgba(255,255,255,.04)}
 body[data-ds-dark-theme] .dit-shell::before{background:radial-gradient(100% 75% at 0% 0%,rgba(255,255,255,.28),transparent 58%),radial-gradient(65% 65% at 100% 0%,rgba(140,180,255,.20),transparent 62%),radial-gradient(55% 55% at 60% 100%,rgba(200,150,255,.10),transparent 65%)}
 body[data-ds-dark-theme] .dit-shell::after{background:linear-gradient(118deg,transparent 30%,rgba(255,255,255,.08) 43%,rgba(255,255,255,.13) 48%,transparent 60%)}
 body[data-ds-dark-theme] .dit-card{background:linear-gradient(160deg,rgba(255,255,255,.14),rgba(255,255,255,.035));border-color:rgba(255,255,255,.26);box-shadow:0 4px 16px rgba(0,0,0,.32),inset 0 1px 0 rgba(255,255,255,.30)}
 body[data-ds-dark-theme] .dit-card:hover{background:linear-gradient(160deg,rgba(255,255,255,.22),rgba(255,255,255,.08));border-color:rgba(255,255,255,.40)}
 body[data-ds-dark-theme] .dit-bar,body[data-ds-dark-theme] .dit-prompt{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.20)}
+body[data-ds-dark-theme] .dit-retry{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.20)}
+body[data-ds-dark-theme] .dit-retry:hover{background:rgba(255,255,255,.14);border-color:rgba(102,204,255,.55)}
+body[data-ds-dark-theme] .dit-icon-btn:hover{background:rgba(255,255,255,.10);border-color:rgba(255,255,255,.20)}
+body[data-ds-dark-theme] .dit-btn{background:rgba(255,255,255,.10);border-color:rgba(255,255,255,.24)}
+body[data-ds-dark-theme] .dit-btn:hover{background:rgba(255,255,255,.18)}
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
   .dit-shell,.dit-card,.dit-bar,.dit-prompt{background:var(--dsw-alias-bg-layer-1,rgba(255,255,255,.92))}
 }

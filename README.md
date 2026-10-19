@@ -221,7 +221,7 @@ V1 不自动调用，也不复制其代码。详见插件 README。
 │     ├─ client.src.js → client.js        Client 源码与构建产物
 │     ├─ scripts/build-client.mjs         零依赖构建（内联 engine.js）
 │     ├─ test/*.test.mjs                  34 个 Node 测试
-│     ├─ docs/preview*.png                验收截图
+│     ├─ docs/preview.png                 验收截图（居中悬浮面板）
 │     └─ README.md                        安装/配置/数据契约/V2 边界
 └─ scripts/
    └─ env-check.ps1                       环境自检脚本
