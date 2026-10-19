@@ -1723,6 +1723,65 @@ return engine;
         return clearComposerHighlight;
       }, [state.phase, state.result, state.applied, state.expectedDraft, draft]);
 
+      const sectionsRef = useRef(null);
+      const wheelAnim = useRef({ raf: 0, target: 0 });
+
+      useEffect(() => {
+        const node = sectionsRef.current;
+        if (!node) return undefined;
+        const anim = wheelAnim.current;
+        const reduceMotion =
+          typeof window !== 'undefined' && typeof window.matchMedia === 'function'
+            ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
+            : false;
+        const maxScroll = () => Math.max(0, node.scrollHeight - node.clientHeight);
+        const clamp = (value) => Math.max(0, Math.min(maxScroll(), value));
+        const stop = () => {
+          if (anim.raf) cancelAnimationFrame(anim.raf);
+          anim.raf = 0;
+        };
+        const tick = () => {
+          const diff = anim.target - node.scrollTop;
+          if (Math.abs(diff) < 1) {
+            node.scrollTop = anim.target;
+            anim.raf = 0;
+            return;
+          }
+          node.scrollTop += diff * 0.24;
+          anim.raf = requestAnimationFrame(tick);
+        };
+        const onWheel = (event) => {
+          if (event.ctrlKey || event.metaKey || event.altKey) return;
+          const max = maxScroll();
+          if (max <= 0) return;
+          const unit = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? node.clientHeight : 1;
+          const delta = event.deltaY * unit;
+          if (!delta) return;
+          const atTop = node.scrollTop <= 0;
+          const atBottom = node.scrollTop >= max - 1;
+          if ((delta < 0 && atTop) || (delta > 0 && atBottom)) return;
+          event.preventDefault();
+          const base = anim.raf ? anim.target : node.scrollTop;
+          anim.target = clamp(base + delta);
+          if (reduceMotion) {
+            node.scrollTop = anim.target;
+            return;
+          }
+          if (!anim.raf) anim.raf = requestAnimationFrame(tick);
+        };
+        const onPointerDown = () => {
+          stop();
+          anim.target = node.scrollTop;
+        };
+        node.addEventListener('wheel', onWheel, { passive: false });
+        node.addEventListener('pointerdown', onPointerDown);
+        return () => {
+          node.removeEventListener('wheel', onWheel);
+          node.removeEventListener('pointerdown', onPointerDown);
+          stop();
+        };
+      }, [state.phase, state.result, state.applied]);
+
       if (state.phase === 'idle') return null;
 
       if (state.phase === 'loading') {
@@ -1867,7 +1926,7 @@ return engine;
             )
           : h(
               'div',
-              { className: 'dit-sections' },
+              { className: 'dit-sections', ref: sectionsRef },
               segments.map((segment, index) => {
                 const high = engine.isHighConfidence(segment);
                 const candidates = high ? segment.candidates.slice(0, 1) : segment.candidates.slice(0, 3);
@@ -1935,7 +1994,9 @@ return engine;
 .dit-undo{color:var(--dsw-alias-state-success-primary,#22c55e)}
 .dit-spin{animation:dit-spin 1s linear infinite}
 @keyframes dit-spin{to{transform:rotate(360deg)}}
-.dit-shell{margin:0 0 6px;padding:12px 14px;color:var(--dsw-alias-label-primary,#1a1a1a);font-size:13px;line-height:1.5;border:1px solid rgba(255,255,255,.45);border-radius:16px;background:rgba(255,255,255,.12);-webkit-backdrop-filter:blur(16px) saturate(150%);backdrop-filter:blur(16px) saturate(150%);box-shadow:0 8px 32px rgba(0,0,0,.14),inset 0 1px 0 rgba(255,255,255,.4)}
+.dit-shell{position:relative;display:flex;flex-direction:column;max-height:min(68vh,640px);overflow:hidden;margin:0 0 6px;padding:12px 14px;color:var(--dsw-alias-label-primary,#1a1a1a);font-size:13px;line-height:1.5;border:1px solid rgba(255,255,255,.38);border-radius:16px;background:linear-gradient(135deg,rgba(255,255,255,.20),rgba(255,255,255,.06) 52%,rgba(255,255,255,.12));-webkit-backdrop-filter:blur(18px) saturate(170%);backdrop-filter:blur(18px) saturate(170%);box-shadow:0 18px 48px rgba(0,0,0,.20),0 2px 10px rgba(0,0,0,.08),inset 0 1px 0 rgba(255,255,255,.45),inset 0 -1px 0 rgba(255,255,255,.05)}
+.dit-shell::before{content:"";position:absolute;inset:0;border-radius:inherit;background:radial-gradient(90% 70% at 0% 0%,rgba(255,255,255,.18),transparent 60%),radial-gradient(70% 60% at 100% 100%,rgba(120,170,255,.12),transparent 65%);pointer-events:none;z-index:0}
+.dit-shell>*{position:relative;z-index:1}
 .dit-bar{display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid rgba(255,255,255,.34);border-radius:12px;background:rgba(255,255,255,.10);min-width:0}
 .dit-bar-text{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .dit-bar.is-loading{color:var(--dsw-alias-label-secondary,#7f8287)}
@@ -1958,7 +2019,10 @@ return engine;
 ::highlight(dsh-intent-translator-ambiguous){color:#66ccff}
 .dit-span{margin-top:2px;font-size:12px;color:var(--dsw-alias-label-tertiary,#979da6);overflow-wrap:anywhere}
 .dit-span code{font-family:var(--ds-font-family-code,monospace);font-size:11.5px;color:var(--dsw-alias-label-secondary,#7f8287);background:var(--dsw-alias-bg-base,rgba(127,127,127,.08));padding:1px 5px;border-radius:var(--dsw-radius-xs,4px)}
-.dit-sections{display:flex;flex-direction:column;gap:10px;max-height:min(58vh,560px);overflow-y:auto;padding:2px 2px 4px;scrollbar-width:thin}
+.dit-sections{display:flex;flex-direction:column;gap:10px;flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;padding:2px 4px 4px 2px;scrollbar-width:thin;scrollbar-color:rgba(127,127,127,.35) transparent}
+.dit-sections::-webkit-scrollbar{width:6px}
+.dit-sections::-webkit-scrollbar-thumb{background:rgba(127,127,127,.35);border-radius:999px}
+.dit-sections::-webkit-scrollbar-track{background:transparent}
 .dit-segment{display:flex;flex-direction:column;gap:5px}
 .dit-seg-head{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:0 2px}
 .dit-seg-span{font-size:12px;color:var(--dsw-alias-label-secondary,#7f8287);overflow-wrap:anywhere}
@@ -1969,8 +2033,8 @@ return engine;
 .dit-foot-actions{display:inline-flex;align-items:center;gap:8px;margin-left:auto}
 .dit-cards{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 4px;scrollbar-width:thin}
 .dit-cards.is-single{overflow-x:visible}
-.dit-card{box-sizing:border-box;flex:1 1 220px;min-width:220px;max-width:320px;display:flex;flex-direction:column;gap:6px;padding:12px;border:1px solid rgba(255,255,255,.32);border-radius:14px;background:rgba(255,255,255,.10);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);box-shadow:0 4px 16px rgba(0,0,0,.08),inset 0 1px 0 rgba(255,255,255,.28);cursor:pointer;transition:border-color .15s,background .15s,box-shadow .15s;text-align:left}
-.dit-card:hover{border-color:rgba(255,255,255,.6);background:rgba(255,255,255,.18);box-shadow:0 10px 26px rgba(0,0,0,.16),0 0 0 1px rgba(77,147,248,.35),inset 0 1px 0 rgba(255,255,255,.45)}
+.dit-card{box-sizing:border-box;flex:1 1 220px;min-width:220px;max-width:320px;display:flex;flex-direction:column;gap:6px;padding:12px;border:1px solid rgba(255,255,255,.30);border-radius:14px;background:linear-gradient(160deg,rgba(255,255,255,.16),rgba(255,255,255,.05));-webkit-backdrop-filter:blur(10px) saturate(160%);backdrop-filter:blur(10px) saturate(160%);box-shadow:0 4px 16px rgba(0,0,0,.08),inset 0 1px 0 rgba(255,255,255,.26);cursor:pointer;transition:border-color .15s,background .15s,box-shadow .15s;text-align:left}
+.dit-card:hover{border-color:rgba(102,204,255,.55);background:linear-gradient(160deg,rgba(255,255,255,.24),rgba(255,255,255,.09));box-shadow:0 10px 26px rgba(0,0,0,.16),0 0 0 1px rgba(102,204,255,.30),0 0 18px rgba(102,204,255,.16),inset 0 1px 0 rgba(255,255,255,.42)}
 .dit-card:focus-visible{outline:2px solid var(--dsw-alias-brand-primary,#4d93f8);outline-offset:2px}
 .dit-card.is-single{flex:1 1 360px;max-width:480px}
 .dit-card-top{display:flex;align-items:center;justify-content:space-between;gap:6px}
@@ -1981,7 +2045,7 @@ return engine;
 .dit-card-links{display:flex;align-items:center;gap:6px}
 .dit-link{border:0;background:transparent;color:var(--dsw-alias-brand-primary,#4d93f8);font:inherit;font-size:12px;padding:2px 0;cursor:pointer;text-align:left}
 .dit-link:hover{text-decoration:underline}
-.dit-prompt{display:flex;flex-direction:column;gap:6px;padding:8px;border:1px solid rgba(255,255,255,.22);border-radius:10px;background:rgba(255,255,255,.10);cursor:default}
+.dit-prompt{display:flex;flex-direction:column;gap:6px;padding:8px;border:1px solid rgba(255,255,255,.20);border-radius:10px;background:rgba(255,255,255,.08);cursor:default}
 .dit-prompt-label{font-size:10.5px;color:var(--dsw-alias-label-tertiary,#979da6);letter-spacing:.04em}
 .dit-prompt-text{font-family:var(--ds-font-family-code,monospace);font-size:11.5px;line-height:1.6;color:var(--dsw-alias-label-primary,#1a1a1a);word-break:break-word;user-select:text}
 .dit-prompt-actions{display:flex;gap:6px}
@@ -1998,6 +2062,21 @@ return engine;
 .dit-refine{display:flex;flex-direction:column;gap:4px;padding:7px 8px;border-radius:var(--dsw-radius-sm,8px);background:color-mix(in srgb,var(--dsw-alias-brand-primary,#4d93f8) 6%,transparent);font-size:11.5px;color:var(--dsw-alias-label-secondary,#7f8287)}
 .dit-refine.is-pending{flex-direction:row;align-items:center;gap:6px}
 .dit-refine.is-error{color:var(--dsw-alias-state-error-primary,#e5484d);background:color-mix(in srgb,var(--dsw-alias-state-error-primary,#e5484d) 7%,transparent)}
+.dit-shell::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:0;background:linear-gradient(118deg,transparent 32%,rgba(255,255,255,.05) 45%,rgba(255,255,255,.075) 49%,transparent 60%)}
+@media (prefers-color-scheme:dark){
+  .dit-shell{background:linear-gradient(135deg,rgba(255,255,255,.15),rgba(255,255,255,.03) 52%,rgba(255,255,255,.07));border-color:rgba(255,255,255,.34);box-shadow:0 18px 48px rgba(0,0,0,.55),0 0 36px rgba(102,204,255,.08),0 2px 10px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.40),inset 0 0 26px rgba(255,255,255,.04)}
+  .dit-shell::before{background:radial-gradient(100% 75% at 0% 0%,rgba(255,255,255,.28),transparent 58%),radial-gradient(65% 65% at 100% 0%,rgba(140,180,255,.20),transparent 62%),radial-gradient(55% 55% at 60% 100%,rgba(200,150,255,.10),transparent 65%)}
+  .dit-shell::after{background:linear-gradient(118deg,transparent 30%,rgba(255,255,255,.08) 43%,rgba(255,255,255,.13) 48%,transparent 60%)}
+  .dit-card{background:linear-gradient(160deg,rgba(255,255,255,.14),rgba(255,255,255,.035));border-color:rgba(255,255,255,.26);box-shadow:0 4px 16px rgba(0,0,0,.32),inset 0 1px 0 rgba(255,255,255,.30)}
+  .dit-card:hover{background:linear-gradient(160deg,rgba(255,255,255,.22),rgba(255,255,255,.08));border-color:rgba(255,255,255,.40)}
+  .dit-bar,.dit-prompt{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.20)}
+}
+body[data-ds-dark-theme] .dit-shell{background:linear-gradient(135deg,rgba(255,255,255,.15),rgba(255,255,255,.03) 52%,rgba(255,255,255,.07));border-color:rgba(255,255,255,.34);box-shadow:0 18px 48px rgba(0,0,0,.55),0 0 36px rgba(102,204,255,.08),0 2px 10px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.40),inset 0 0 26px rgba(255,255,255,.04)}
+body[data-ds-dark-theme] .dit-shell::before{background:radial-gradient(100% 75% at 0% 0%,rgba(255,255,255,.28),transparent 58%),radial-gradient(65% 65% at 100% 0%,rgba(140,180,255,.20),transparent 62%),radial-gradient(55% 55% at 60% 100%,rgba(200,150,255,.10),transparent 65%)}
+body[data-ds-dark-theme] .dit-shell::after{background:linear-gradient(118deg,transparent 30%,rgba(255,255,255,.08) 43%,rgba(255,255,255,.13) 48%,transparent 60%)}
+body[data-ds-dark-theme] .dit-card{background:linear-gradient(160deg,rgba(255,255,255,.14),rgba(255,255,255,.035));border-color:rgba(255,255,255,.26);box-shadow:0 4px 16px rgba(0,0,0,.32),inset 0 1px 0 rgba(255,255,255,.30)}
+body[data-ds-dark-theme] .dit-card:hover{background:linear-gradient(160deg,rgba(255,255,255,.22),rgba(255,255,255,.08));border-color:rgba(255,255,255,.40)}
+body[data-ds-dark-theme] .dit-bar,body[data-ds-dark-theme] .dit-prompt{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.20)}
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
   .dit-shell,.dit-card,.dit-bar,.dit-prompt{background:var(--dsw-alias-bg-layer-1,rgba(255,255,255,.92))}
 }

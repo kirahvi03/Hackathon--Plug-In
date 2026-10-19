@@ -172,7 +172,7 @@ dsh plugin --profile desktop add "C:\path\to\Hackathon--Plug-In\plugins\dsh-inte
 
 ```powershell
 cd plugins\dsh-intent-translator
-npm test        # 构建 client.js，再跑 33 个 Node 测试
+npm test        # 构建 client.js，再跑 34 个 Node 测试
 ```
 
 V2 只预留接口：点选方向后可通过 `ctx` 调用 `dsh-prompt-optimizer` 精修，
@@ -220,7 +220,7 @@ V1 不自动调用，也不复制其代码。详见插件 README。
 │     ├─ lib/{engine,host}.js             纯逻辑 + 路由/LLM/超时
 │     ├─ client.src.js → client.js        Client 源码与构建产物
 │     ├─ scripts/build-client.mjs         零依赖构建（内联 engine.js）
-│     ├─ test/*.test.mjs                  33 个 Node 测试
+│     ├─ test/*.test.mjs                  34 个 Node 测试
 │     ├─ docs/preview*.png                验收截图
 │     └─ README.md                        安装/配置/数据契约/V2 边界
 └─ scripts/

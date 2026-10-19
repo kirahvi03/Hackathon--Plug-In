@@ -97,7 +97,7 @@ Host 面 `POST /api/dsh-intent-translator/fork` 调用 `ctx.llm.stream()`，负�
 
 ```powershell
 cd plugins\dsh-intent-translator
-npm test     # 构建 client.js，再跑 33 个 Node 测试
+npm test     # 构建 client.js，再跑 34 个 Node 测试
 ```
 
 ## 已知限制
